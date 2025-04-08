@@ -141,7 +141,7 @@
   <ItemGroup>
     <ClCompile Include="binarization.c" />
     <ClCompile Include="bi_utils.c" />
-    <ClCompile Include="main.c" />
+    <ClCompile Include="frameCalculator.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binarization.h" />
