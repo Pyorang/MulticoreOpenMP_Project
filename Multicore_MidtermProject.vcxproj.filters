@@ -15,22 +15,43 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
+    <ClCompile Include="bi_utils.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="video_utils.c">
+    <ClCompile Include="binarization.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="frame_utils.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="frameCalculator.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay_utils.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="video_utils.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="video_utils.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="bi_utils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="binarization.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="frame_utils.h">
-      <Filter>소스 파일</Filter>
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay_utils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="video_utils.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

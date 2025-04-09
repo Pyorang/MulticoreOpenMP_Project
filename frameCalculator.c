@@ -44,7 +44,7 @@ void save_pgm(const char* filename, uint8_t* data, int width, int height) {
 }
 
 int run_frame_diff(const char* file1, const char* file2, int threshold) {
-    
+
     int width, height;
     uint8_t* img1 = my_load_pgm(file1, &width, &height);
     uint8_t* img2 = my_load_pgm(file2, &width, &height);
