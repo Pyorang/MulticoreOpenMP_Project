@@ -2,6 +2,7 @@
 #include <math.h>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <stdio.h>
 
 void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_area) {
     for (int i = 1; i < totalFrames; i++) {
@@ -39,21 +40,18 @@ void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_are
             cvDrawContours(overlayImg, c, CV_RGB(0, 255, 0), CV_RGB(0, 255, 0), 0, 2, 8, cvPoint(0, 0));
         }
 
-        for (int y = 0; y < overlayImg->height; y++) {
-            uchar* pMask = (uchar*)(fullMask->imageData + y * fullMask->widthStep);
-            uchar* pOverlay = (uchar*)(overlayImg->imageData + y * overlayImg->widthStep);
-            for (int x = 0; x < overlayImg->width; x++) {
-                if (pMask[x] == 255) {
-                    float alpha = 0.4f;
-                    pOverlay[x * 3 + 0] = (uchar)(pOverlay[x * 3 + 0] * (1 - alpha));
-                    pOverlay[x * 3 + 1] = (uchar)(pOverlay[x * 3 + 1] * (1 - alpha));
-                    pOverlay[x * 3 + 2] = (uchar)(pOverlay[x * 3 + 2] * (1 - alpha) + 255 * alpha);
-                }
-            }
-        }
+        // 로딩바 출력 (진행 상태 표시)
+        int progress = (i * 100) / (totalFrames - 1);  // 진행률 계산
+        printf("\r[");
+        for (int j = 0; j < progress / 2; j++)  // 50칸 기준으로 로딩바 출력
+            printf("=");
+        for (int j = progress / 2; j < 50; j++)  // 나머지 부분은 공백
+            printf(" ");
+        printf("] %d%%", progress);
+        fflush(stdout);  // 버퍼를 강제로 비우기
 
-        if (cvSaveImage(overlayJPG, overlayImg, 0))
-            printf(" 오버레이 저장 완료: %s\n", overlayJPG);
+        // 이미지 저장
+        cvSaveImage(overlayJPG, overlayImg, 0);
 
         cvReleaseImage(&binaryImg);
         cvReleaseImage(&colorImg);
@@ -61,4 +59,7 @@ void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_are
         cvReleaseImage(&fullMask);
         cvReleaseMemStorage(&storage);
     }
+
+    // 마지막 줄바꿈 추가
+    printf("\n");
 }

@@ -15,6 +15,7 @@
 
 int main(int argc, char** argv)
 {
+    
     const char* videoPath;
     const char* outputDir;
     int threshold = 20;
@@ -27,15 +28,21 @@ int main(int argc, char** argv)
     if (argc >= 4) threshold = atoi(argv[3]);
     if (argc >= 5) min_area = atoi(argv[4]);
 
-    // Phase 1: 프레임 추출
+    //////////////////////////
+    //  Phase 1: 프레임 추출
+    //////////////////////////
+    printf("프레임 추출\n");
     CvCapture* capture = openVideo(videoPath);
     if (!capture) return -1;
 
     int totalFrames = extractFrames(capture, outputDir);
     cvReleaseCapture(&capture);
-    printf("전체 프레임 수: %d\n", totalFrames);
+    printf("프레임 추출완료. 전체 프레임 수: %d\n", totalFrames);
 
+    //////////////////////////
     // Phase 2: 차이 계산 및 이진화
+    //////////////////////////
+    printf("차이 계산 및 이진화\n");
     for (int i = 0; i < totalFrames - 1; i++) {
         char prevPGM[256], curPGM[256], diffPGM[256], binaryPGM[256];
         sprintf(prevPGM, "%s/frame_%04d.pgm", outputDir, i);
@@ -64,22 +71,63 @@ int main(int argc, char** argv)
         my_save_pgm(diffPGM, diff, width, height);
         my_save_pgm(binaryPGM, binary, width, height);
         free(img1); free(img2); free(diff); free(binary);
+
+        int progress = (i * 100) / (totalFrames - 1);  
+        printf("\r[");
+        for (int j = 0; j < progress / 2; j++) 
+            printf("=");
+        for (int j = progress / 2; j < 50; j++)
+            printf(" ");
+        printf("] %d%%", progress);
+        fflush(stdout);  
     }
 
+    printf("\n");
+
+    printf("차이 계산 및 이진화 완료\n");
+    
+    //////////////////////////
     // Phase 3: 오버레이 생성
+    //////////////////////////
+    printf("오버레이 생성\n");
     overlayContoursOnFrames(outputDir, totalFrames, min_area);
+    printf("오버레이 생성 완료\n");
 
+
+    //////////////////////////
     // Phase 4: 엔트로피 계산
-    double* entropy_array = (double*)malloc(sizeof(double) * (totalFrames - 1));
-    if (!entropy_array) return -1;
+    //////////////////////////
+    printf(" [Serial] Entropy Computation\n");
+    double* entropy_serial = (double*)malloc(sizeof(double) * (totalFrames - 1));
+    double serial_start = omp_get_wtime();
+    compute_entropy_array_serial(outputDir, totalFrames, entropy_serial);
+    double serial_end = omp_get_wtime();
+    printf("Total Serial Time: %.6fs\n\n", serial_end - serial_start);
 
-    compute_entropy_array(outputDir, totalFrames, entropy_array);
+    printf("[Parallel] Entropy Computation\n");
+    double* entropy_parallel = (double*)malloc(sizeof(double) * (totalFrames - 1));
+    double parallel_start = omp_get_wtime();
+    compute_entropy_array(outputDir, totalFrames, entropy_parallel);
+    double parallel_end = omp_get_wtime();
+    printf(" Total Parallel Time: %.6fs\n\n", parallel_end - parallel_start);
 
-    printf("=== 엔트로피 값 (샘플 출력) ===\n");
-    for (int i = 0; i < 10 && i < totalFrames - 1; i++) {
-        printf("frame %04d entropy raw: %.4lf\n", i + 1, entropy_array[i]);
+    double speedup = (serial_end - serial_start) / (parallel_end - parallel_start);
+    printf(" Speed-up: %.2fx\n", speedup);
+
+    // 일부 값 확인
+    printf("\n Sample Comparison (First 5 frames):\n");
+    for (int i = 0; i < 5 && i < totalFrames - 1; i++) {
+        printf("  Frame %04d | Serial: %.4lf | Parallel: %.4lf\n", i + 1, entropy_serial[i], entropy_parallel[i]);
     }
 
-    free(entropy_array);
+
+    //////////////////////////
+   // Phase 5: 
+   //////////////////////////
+    
+    // entropy_serial 또는 entropy_parallel 사용하시면 됩니다. 
+
+    free(entropy_serial);
+    free(entropy_parallel);
     return 0;
 }
