@@ -21,3 +21,4 @@ void binarize_image_parallel(uint8_t* diff, uint8_t* binary, int width, int heig
         binary[i] = (diff[i] > threshold) ? 255 : 0;
     }
 }
+
