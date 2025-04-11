@@ -11,6 +11,8 @@ void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_are
         sprintf(overlayJPG, "%s/overlay_%04d.jpg", outputDir, i);
 
         IplImage* binaryImg = cvLoadImage(binaryPGM, CV_LOAD_IMAGE_GRAYSCALE);
+        if (!binaryImg) continue;
+
         cvDilate(binaryImg, binaryImg, NULL, 1);
         cvErode(binaryImg, binaryImg, NULL, 1);
 
@@ -20,6 +22,12 @@ void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_are
             CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cvPoint(0, 0));
 
         IplImage* colorImg = cvLoadImage(colorJPG, CV_LOAD_IMAGE_COLOR);
+        if (!colorImg) {
+            cvReleaseImage(&binaryImg);
+            cvReleaseMemStorage(&storage);
+            continue;
+        }
+
         IplImage* overlayImg = cvCloneImage(colorImg);
         IplImage* fullMask = cvCreateImage(cvGetSize(overlayImg), IPL_DEPTH_8U, 1);
         cvZero(fullMask);
@@ -44,7 +52,8 @@ void overlayContoursOnFrames(const char* outputDir, int totalFrames, int min_are
             }
         }
 
-        cvSaveImage(overlayJPG, overlayImg, 0);
+        if (cvSaveImage(overlayJPG, overlayImg, 0))
+            printf(" 오버레이 저장 완료: %s\n", overlayJPG);
 
         cvReleaseImage(&binaryImg);
         cvReleaseImage(&colorImg);
