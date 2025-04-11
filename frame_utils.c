@@ -6,17 +6,8 @@
 int saveFrame(IplImage* frame, const char* outputDir, int frameCount)
 {
     char filename[256];
-
     sprintf(filename, "%s/frame_%04d.jpg", outputDir, frameCount);
-
-    int result = cvSaveImage(filename, frame, 0);
-
-    if (result)
-        printf("저장됨: %s\n", filename);
-    else
-        printf("저장 실패: %s\n", filename);
-
-    return result;
+    return cvSaveImage(filename, frame, 0);
 }
 
 int saveFrameAsPGM(IplImage* frame, const char* outputDir, int frameCount)
@@ -44,11 +35,6 @@ int saveFrameAsPGM(IplImage* frame, const char* outputDir, int frameCount)
         cvReleaseImage(&grayFrame);
     }
 
-    if (result)
-        printf("PGM 형식으로 저장됨: %s\n", filename);
-    else
-        printf("PGM 저장 실패: %s\n", filename);
-
     return result;
 }
 
@@ -57,21 +43,32 @@ int extractFrames(CvCapture* capture, const char* outputDir)
     IplImage* frame;
     int frameCount = 0;
 
+    int totalFrames = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+
     while ((frame = cvQueryFrame(capture)) != NULL)
     {
-        if (!saveFrame(frame, outputDir, frameCount))
+        if (!saveFrame(frame, outputDir, frameCount) ||
+            !saveFrameAsPGM(frame, outputDir, frameCount))
         {
-            printf("프레임 저장 중 오류 발생, 중단합니다.\n");
             break;
         }
 
-        if (!saveFrameAsPGM(frame, outputDir, frameCount))
-        {
-            printf("프레임 저장 중 오류 발생, 중단합니다.\n");
-            break;
-        }
         frameCount++;
+
+        if (frameCount % 10 == 0)  
+        {
+            int progress = (frameCount * 100) / totalFrames;  
+            printf("\r[");
+            for (int i = 0; i < progress / 2; i++)  
+                printf("=");
+            for (int i = progress / 2; i < 50; i++)  
+                printf(" ");
+            printf("] %d%%", progress);
+            fflush(stdout);  
+        }
     }
+
+    printf("\n");
 
     return frameCount;
 }

@@ -106,6 +106,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <AdditionalIncludeDirectories>C:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +125,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <AdditionalIncludeDirectories>C:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="binarization.c" />
     <ClCompile Include="bi_utils.c" />
+    <ClCompile Include="entropy_utils.c" />
     <ClCompile Include="frameCalculator.c" />
     <ClCompile Include="frame_utils.c" />
     <ClCompile Include="main.c" />
@@ -146,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="binarization.h" />
     <ClInclude Include="bi_utils.h" />
+    <ClInclude Include="entropy_utils.h" />
     <ClInclude Include="frame_utils.h" />
     <ClInclude Include="overlay_utils.h" />
     <ClInclude Include="video_utils.h" />

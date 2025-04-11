@@ -36,6 +36,9 @@
     <ClCompile Include="video_utils.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="entropy_utils.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bi_utils.h">
@@ -51,6 +54,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="video_utils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="entropy_utils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
