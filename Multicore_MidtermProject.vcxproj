@@ -143,6 +143,7 @@
     <ClCompile Include="frameCalculator.c" />
     <ClCompile Include="frame_utils.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="outlier_utils.c" />
     <ClCompile Include="overlay_utils.c" />
     <ClCompile Include="video_utils.c" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="bi_utils.h" />
     <ClInclude Include="entropy_utils.h" />
     <ClInclude Include="frame_utils.h" />
+    <ClInclude Include="outlier_utils.h" />
     <ClInclude Include="overlay_utils.h" />
     <ClInclude Include="video_utils.h" />
   </ItemGroup>

@@ -12,6 +12,10 @@
 #include "video_utils.h"
 #include "overlay_utils.h"
 #include "entropy_utils.h"
+#include "outlier_utils.h"
+
+#define SEGMENTSIZE 30
+#define K 5
 
 int main(int argc, char** argv)
 {
@@ -122,12 +126,41 @@ int main(int argc, char** argv)
 
 
     //////////////////////////
-   // Phase 5: 
-   //////////////////////////
+    // Phase 5: 이상치 계산
+    //////////////////////////
     
-    // entropy_serial 또는 entropy_parallel 사용하시면 됩니다. 
+    printf(" [Serial] Outlier Computation\n");
+    double* outlier_serial = (double*)malloc(sizeof(double) * (totalFrames - SEGMENTSIZE + 1));
+    serial_start = omp_get_wtime();
+    compute_outlier_serial(SEGMENTSIZE, K, totalFrames, entropy_serial, outlier_serial);
+    serial_end = omp_get_wtime();
+    printf("Total Serial Time: %.6fs\n\n", serial_end - serial_start);
+    
+    printf("[Parallel] Outlier Computation\n");
+    double* outlier_parallel = (double*)malloc(sizeof(double) * (totalFrames - SEGMENTSIZE + 1));
+    parallel_start = omp_get_wtime();
+    compute_outlier_parallel(SEGMENTSIZE, K, totalFrames, entropy_parallel, outlier_parallel);
+    parallel_end = omp_get_wtime();
+    printf(" Total Parallel Time: %.6fs\n\n", parallel_end - parallel_start);
+
+    speedup = (serial_end - serial_start) / (parallel_end - parallel_start);
+    printf(" Speed-up: %.2fx\n", speedup);
+
+    // 일부 값 확인
+    printf("\n Sample Comparison (First 5 frames):\n");
+    for (int i = 0; i < 5 && i < totalFrames - SEGMENTSIZE + 1; i++) {
+        printf("  Frame %04d | Serial: %.4lf | Parallel: %.4lf\n", i + 1, outlier_serial[i], outlier_parallel[i]);
+    }
+
+    //////////////////////////
+    // Phase 6: 
+    //////////////////////////
+
+    //여기서부터 작성하시면 됩니다.
 
     free(entropy_serial);
     free(entropy_parallel);
+    free(outlier_serial);
+    free(outlier_parallel);
     return 0;
 }
