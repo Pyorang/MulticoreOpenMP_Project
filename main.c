@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
 #include "frame_utils.h"
 #include "bi_utils.h"
 #include "binarization.h"
@@ -13,7 +14,10 @@
 #include "overlay_utils.h"
 #include "entropy_utils.h"
 #include "outlier_utils.h"
+#include "warningvideo.h"
+#include "overlayvideo_utils.h"
 
+#define MAX_IMAGES 1000
 #define SEGMENTSIZE 30
 #define K 5
 
@@ -26,27 +30,27 @@ int main(int argc, char** argv)
     int min_area = 100;
 
     if (parseArguments(argc, argv, &videoPath, &outputDir) != 0) {
-        printf("»ç¿ë¹ı: %s <µ¿¿µ»ó ÆÄÀÏ °æ·Î> <ÀúÀå Æú´õ °æ·Î> [ÀÓ°è°ª] [ÃÖ¼Ò¸éÀû]\n", argv[0]);
+        printf("ì‚¬ìš©ë²•: %s <ë™ì˜ìƒ íŒŒì¼ ê²½ë¡œ> <ì €ì¥ í´ë” ê²½ë¡œ> [ì„ê³„ê°’] [ìµœì†Œë©´ì ]\n", argv[0]);
         return -1;
     }
     if (argc >= 4) threshold = atoi(argv[3]);
     if (argc >= 5) min_area = atoi(argv[4]);
 
     //////////////////////////
-    //  Phase 1: ÇÁ·¹ÀÓ ÃßÃâ
+    //  Phase 1: í”„ë ˆì„ ì¶”ì¶œ
     //////////////////////////
-    printf("ÇÁ·¹ÀÓ ÃßÃâ\n");
+    printf("í”„ë ˆì„ ì¶”ì¶œ\n");
     CvCapture* capture = openVideo(videoPath);
     if (!capture) return -1;
 
     int totalFrames = extractFrames(capture, outputDir);
     cvReleaseCapture(&capture);
-    printf("ÇÁ·¹ÀÓ ÃßÃâ¿Ï·á. ÀüÃ¼ ÇÁ·¹ÀÓ ¼ö: %d\n", totalFrames);
+    printf("í”„ë ˆì„ ì¶”ì¶œì™„ë£Œ. ì „ì²´ í”„ë ˆì„ ìˆ˜: %d\n", totalFrames);
 
     //////////////////////////
-    // Phase 2: Â÷ÀÌ °è»ê ¹× ÀÌÁøÈ­
+    // Phase 2: ì°¨ì´ ê³„ì‚° ë° ì´ì§„í™”
     //////////////////////////
-    printf("Â÷ÀÌ °è»ê ¹× ÀÌÁøÈ­\n");
+    printf("ì°¨ì´ ê³„ì‚° ë° ì´ì§„í™”\n");
     for (int i = 0; i < totalFrames - 1; i++) {
         char prevPGM[256], curPGM[256], diffPGM[256], binaryPGM[256];
         sprintf(prevPGM, "%s/frame_%04d.pgm", outputDir, i);
@@ -88,18 +92,18 @@ int main(int argc, char** argv)
 
     printf("\n");
 
-    printf("Â÷ÀÌ °è»ê ¹× ÀÌÁøÈ­ ¿Ï·á\n");
+    printf("ì°¨ì´ ê³„ì‚° ë° ì´ì§„í™” ì™„ë£Œ\n");
     
     //////////////////////////
-    // Phase 3: ¿À¹ö·¹ÀÌ »ı¼º
+    // Phase 3: ì˜¤ë²„ë ˆì´ ìƒì„±
     //////////////////////////
-    printf("¿À¹ö·¹ÀÌ »ı¼º\n");
+    printf("ì˜¤ë²„ë ˆì´ ìƒì„±\n");
     overlayContoursOnFrames(outputDir, totalFrames, min_area);
-    printf("¿À¹ö·¹ÀÌ »ı¼º ¿Ï·á\n");
+    printf("ì˜¤ë²„ë ˆì´ ìƒì„± ì™„ë£Œ\n");
 
 
     //////////////////////////
-    // Phase 4: ¿£Æ®·ÎÇÇ °è»ê
+    // Phase 4: ì—”íŠ¸ë¡œí”¼ ê³„ì‚°
     //////////////////////////
     printf(" [Serial] Entropy Computation\n");
     double* entropy_serial = (double*)malloc(sizeof(double) * (totalFrames - 1));
@@ -118,7 +122,7 @@ int main(int argc, char** argv)
     double speedup = (serial_end - serial_start) / (parallel_end - parallel_start);
     printf(" Speed-up: %.2fx\n", speedup);
 
-    // ÀÏºÎ °ª È®ÀÎ
+    // ì¼ë¶€ ê°’ í™•ì¸
     printf("\n Sample Comparison (First 5 frames):\n");
     for (int i = 0; i < 5 && i < totalFrames - 1; i++) {
         printf("  Frame %04d | Serial: %.4lf | Parallel: %.4lf\n", i + 1, entropy_serial[i], entropy_parallel[i]);
@@ -126,7 +130,7 @@ int main(int argc, char** argv)
 
 
     //////////////////////////
-    // Phase 5: ÀÌ»óÄ¡ °è»ê
+    // Phase 5: ì´ìƒì¹˜ ê³„ì‚°
     //////////////////////////
     
     printf(" [Serial] Outlier Computation\n");
@@ -146,7 +150,7 @@ int main(int argc, char** argv)
     speedup = (serial_end - serial_start) / (parallel_end - parallel_start);
     printf(" Speed-up: %.2fx\n", speedup);
 
-    // ÀÏºÎ °ª È®ÀÎ
+    // ì¼ë¶€ ê°’ í™•ì¸
     printf("\n Sample Comparison (First 5 frames):\n");
     for (int i = 0; i < 5 && i < totalFrames - SEGMENTSIZE + 1; i++) {
         printf("  Frame %04d | Serial: %.4lf | Parallel: %.4lf\n", i + 1, outlier_serial[i], outlier_parallel[i]);
@@ -156,7 +160,23 @@ int main(int argc, char** argv)
     // Phase 6: 
     //////////////////////////
 
-    //¿©±â¼­ºÎÅÍ ÀÛ¼ºÇÏ½Ã¸é µË´Ï´Ù.
+    printf("ë™ì˜ìƒ íŒŒì¼ ìƒì„±\n");
+
+    // 1. ì…ë ¥ ì´ë¯¸ì§€ê°€ ìˆëŠ” í´ë” ê²½ë¡œ
+    const char* input_folder = "frames";
+
+    // 2. ì¶œë ¥ ì´ë¯¸ì§€ê°€ ì €ì¥ë  í´ë”
+    const char* output_folder = "output";
+
+    // 3. ë¹¨ê°„ í”„ë ˆì„ ì˜¤ë²„ë ˆì´ ìƒì„±
+    generate_redframe(input_folder, outlier_parallel, threshold, output_folder);
+
+    // 4. ì˜¤ë²„ë ˆì´ëœ í”„ë ˆì„ì„ ì˜ìƒìœ¼ë¡œ ë³€í™˜
+    generate_redvideo(output_folder);
+
+
+    printf("ì™„ë£Œ: output_video.avi ìƒì„±ë¨\n");
+
 
     free(entropy_serial);
     free(entropy_parallel);
